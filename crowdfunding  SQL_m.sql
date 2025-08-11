@@ -91,6 +91,53 @@ ORDER BY
     pledged DESC
 LIMIT 10;
 
-      
+     ############################################## Percentage of Overall Successful Projects  ###################################################### 
+
+SELECT
+concat(ROUND(SUM(state = 'successful') / COUNT(*) * 100,2),' %') AS  sucessful_project
+FROM projects;
+
+############################################## Percentage of Successful Projects by Category ###################################################### 
+
+SELECT category_table.name,
+  concat(ROUND(SUM(state = 'successful') / COUNT(*) * 100,2),' %') AS sucessful_project
+FROM projects
+inner join category_table
+using (category_id)
+group by category_table.name
+order by sucessful_project desc;
+
+############################################## Percentage of Successful Projects by year, month ###################################################### 
+
+SELECT
+    YEAR(FROM_UNIXTIME(created_at)) AS project_year,
+    MONTH(FROM_UNIXTIME(created_at)) AS project_month,
+    QUARTER(FROM_UNIXTIME(created_at)) AS project_quarter,
+    concat(ROUND(
+        COUNT(CASE WHEN state = 'successful' THEN 1 END) * 100.0 / COUNT(*),
+        2
+    ),' %') AS success_percentage
+FROM
+    projects
+GROUP BY
+    project_year, project_month, project_quarter
+ORDER BY
+    project_year, project_month;
+
+
+############################################## Percentage of Successful projects by Goal Range ###################################################### 
+
+SELECT 
+  CASE 
+    WHEN goal <= 1000 THEN '0-1K'
+    WHEN goal <= 5000 THEN '1K-5K'
+    WHEN goal <= 10000 THEN '5K-10K'
+    ELSE '10K+'
+  END AS goal_range,
+ concat( round(COUNT(CASE WHEN state = 'successful' THEN 1 END) / COUNT(*) * 100,2) ,' %')AS success_project
+FROM projects
+Group by goal_range
+order by success_project desc;
+ 
       
 
